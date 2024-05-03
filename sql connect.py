@@ -1,21 +1,3 @@
-# import mysql.connector as m
-# mydatabase=m.connect(host='localhost',user='root',password='123456',database='python_class')
-# cursor=mydatabase.cursor()
-# cursor.execute("create table dep(deptno int primary key auto_increment,deptname varchar(100),loc varchar(30))")
-
-# import mysql.connector as m
-
-# mydatabase=m.connect(host="localhost" ,user="root",password="123456",database="python_class")
-
-# cursor=mydatabase.cursor()
-
-# query1 = "insert into dep(deptname,loc) values(%s,%s)"
-
-# mydata1 = ('account','noida')
-
-# cursor.execute(query1,mydata1)
-
-# mydatabase.commit()
 
 import mysql.connector as m
 
