@@ -31,46 +31,41 @@ def display_detail():
                 print("Error retrieving access level:", err)
                 return None
 
-    def get_data_for_user(conn, user_id):
-        print("User ID:", user_id) 
-        access_level = get_access_level(conn, user_id)
-        print("Access Level:", access_level)  
-        if access_level == 'HR':
-            try:
-                # Query to fetch all data
-                query = """
-                    SELECT e.emp_id, e.Name, e.Mob_Number, e.Email, e.Branch, e.Date_of_joining,
-                        a.full_day, a.half_day, a.total_leaves, a.total_attendance
-                    FROM Empt e
-                    JOIN hrempt a ON e.emp_id = a.emp_id
-                """
-                cursor = conn.cursor()
-                cursor.execute(query)
-                data = cursor.fetchall()
-                cursor.close()
-                return data
-            except mysql.connector.Error as err:
-                print("Error fetching data for HR:", err)
-                return None
-        elif access_level:
-            try:
-                # Query to fetch data for the specific user
-                query = """
-                    SELECT e.emp_id, e.Name, e.Mob_Number, e.Email, e.Branch, e.Date_of_joining,
-                        a.full_day, a.half_day, a.total_leaves, a.total_attendance
-                    FROM Empt e
-                    JOIN hrempt a ON e.emp_id = a.emp_id
-                    WHERE e.emp_id = %s
-                """
-                cursor = conn.cursor()
-                cursor.execute(query, (user_id,))
-                data = cursor.fetchall()
-                cursor.close()
-                return data
-            except mysql.connector.Error as err:
-                print("Error fetching data for employee:", err)
-                return None
-        else:
+    def get_all_employee_data(conn):
+        try:
+            # Query to fetch all data
+            query = """
+                SELECT e.emp_id, e.Name, e.Mob_Number, e.Email, e.Branch, e.Date_of_joining,
+                    a.full_day, a.half_day, a.total_leaves, a.total_attendance
+                FROM Empt e
+                JOIN hrempt a ON e.emp_id = a.emp_id
+            """
+            cursor = conn.cursor()
+            cursor.execute(query)
+            data = cursor.fetchall()
+            cursor.close()
+            return data
+        except mysql.connector.Error as err:
+            print("Error fetching data for HR:", err)
+            return None
+
+    def get_employee_data(conn, emp_id):
+        try:
+            # Query to fetch data for the specific employee
+            query = """
+                SELECT e.emp_id, e.Name, e.Mob_Number, e.Email, e.Branch, e.Date_of_joining,
+                    a.full_day, a.half_day, a.total_leaves, a.total_attendance
+                FROM Empt e
+                JOIN hrempt a ON e.emp_id = a.emp_id
+                WHERE e.emp_id = %s
+            """
+            cursor = conn.cursor()
+            cursor.execute(query, (emp_id,))
+            data = cursor.fetchall()
+            cursor.close()
+            return data
+        except mysql.connector.Error as err:
+            print("Error fetching data for employee:", err)
             return None
 
     def show_table(data):
@@ -94,9 +89,25 @@ def display_detail():
         try:
             conn = connect_to_database()
             if conn:
-                user_id = int(input("Enter your user id: "))  # Assuming 'p1' is the user ID for HR
-                data = get_data_for_user(conn, user_id)
-                show_table(data)
+                user_id = int(input("Enter your user id: "))
+                access_level = get_access_level(conn, user_id)
+                if access_level == 'HR':
+                    print("Options:")
+                    print("1. See all employee details")
+                    print("2. See specific employee detail")
+                    choice = input("Enter your choice: ")
+                    if choice == '1':
+                        data = get_all_employee_data(conn)
+                        show_table(data)
+                    elif choice == '2':
+                        emp_id = input("Enter employee ID: ")
+                        data = get_employee_data(conn, emp_id)
+                        show_table(data)
+                    else:
+                        print("Invalid choice.")
+                else:
+                    data = get_employee_data(conn, user_id)
+                    show_table(data)
             else:
                 print("Failed to establish connection to the database.")
         except ValueError:
